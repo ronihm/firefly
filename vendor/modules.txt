@@ -1,0 +1,53 @@
+# github.com/EDDYCJY/fake-useragent v0.2.0
+## explicit
+github.com/EDDYCJY/fake-useragent
+github.com/EDDYCJY/fake-useragent/downloader
+github.com/EDDYCJY/fake-useragent/scheduler
+github.com/EDDYCJY/fake-useragent/setting
+github.com/EDDYCJY/fake-useragent/spiders
+github.com/EDDYCJY/fake-useragent/useragent
+github.com/EDDYCJY/fake-useragent/useragent/cache
+# github.com/PuerkitoBio/goquery v1.8.1
+## explicit; go 1.13
+github.com/PuerkitoBio/goquery
+# github.com/andybalholm/cascadia v1.3.1
+## explicit; go 1.16
+github.com/andybalholm/cascadia
+# github.com/antchfx/htmlquery v1.3.0
+## explicit; go 1.14
+# github.com/antchfx/xmlquery v1.3.18
+## explicit; go 1.14
+# github.com/antchfx/xpath v1.2.4
+## explicit; go 1.14
+# github.com/corpix/uarand v0.2.0
+## explicit; go 1.17
+# github.com/dghubble/trie v0.0.0-20230729160116-2bc358f28a8b
+## explicit; go 1.19
+github.com/dghubble/trie
+# github.com/gobwas/glob v0.2.3
+## explicit
+# github.com/gocolly/colly v1.2.0
+## explicit
+# github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
+## explicit
+# github.com/golang/protobuf v1.5.2
+## explicit; go 1.9
+# github.com/kennygrant/sanitize v1.2.4
+## explicit
+# github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
+## explicit
+# github.com/temoto/robotstxt v1.1.2
+## explicit; go 1.11
+# golang.org/x/net v0.20.0
+## explicit; go 1.18
+golang.org/x/net/html
+golang.org/x/net/html/atom
+# golang.org/x/text v0.14.0
+## explicit; go 1.18
+# golang.org/x/time v0.5.0
+## explicit; go 1.18
+golang.org/x/time/rate
+# google.golang.org/appengine v1.6.8
+## explicit; go 1.11
+# google.golang.org/protobuf v1.26.0
+## explicit; go 1.9
