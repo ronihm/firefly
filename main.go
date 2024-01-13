@@ -2,15 +2,18 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"regexp"
 	"strings"
 	"sync"
+	"unicode"
 
 	"firefly/fetcher"
 	"firefly/safetrie"
+	"firefly/wordcounter"
 
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/time/rate"
@@ -27,6 +30,7 @@ type FireflyApp struct {
 	urlsFilename  string
 	wordsBank     *safetrie.SafeTrie
 	fetcher       fetcher.Fetcher
+	wordsCounter  wordcounter.WordCounter
 }
 
 func isAlphabetic(s string) bool {
@@ -69,15 +73,25 @@ func (f *FireflyApp) fetchEssayWorker(urlsChan <-chan string, essaysChan chan<- 
 		}
 
 		essay := doc.Find(essayClass).Text()
-		fmt.Println(essay)
 		essaysChan <- essay
 	}
 	wg.Done()
 }
 
 func (f *FireflyApp) countWordsWorker(essaysChan <-chan string, wg *sync.WaitGroup) {
+	// ignore punctuation marks like brackets, quotes, etc...
+	isSeparator := func(c rune) bool {
+		return !unicode.IsLetter(c) && !unicode.IsNumber(c) && string(c) != "'"
+	}
+
 	for essay := range essaysChan {
-		fmt.Println(essay)
+		words := strings.FieldsFunc(essay, isSeparator)
+		for _, word := range words {
+			word = strings.ToLower(word)
+			if f.wordsBank.IsInTrie(word) {
+				f.wordsCounter.Increase(word)
+			}
+		}
 	}
 	wg.Done()
 }
@@ -123,57 +137,14 @@ func (f *FireflyApp) fetchAndProcessEssays() {
 	close(essaysChan)
 	countWG.Wait()
 
+	topWords := f.wordsCounter.GetTopK(10)
+	prettyJson, err := json.MarshalIndent(topWords, "", "    ")
+	if err != nil {
+		fmt.Println("error marshaling result: ", err)
+	}
+	fmt.Println(string(prettyJson))
 	fmt.Println("finished")
 }
-
-// func (f *FireflyApp) fetchAndProcessEssays2() {
-// file, err := os.Open("./" + f.urlsFilename)
-// if err != nil {
-// 	fmt.Println("Error opening urls file: ", err)
-// 	return
-// }
-// defer file.Close()
-
-// scanner := bufio.NewScanner(file)
-// urlsChan := make(chan string)
-
-// // insert urls to chan
-// go func() {
-// 	for scanner.Scan() {
-// 		urlsChan <- scanner.Text()
-// 	}
-// 	close(urlsChan)
-// }()
-
-// wg := sync.WaitGroup{}
-// wg.Add(2)
-// for i := 0; i < 2; i++ {
-// 	go func() {
-// 		for url := range urlsChan {
-// 			resp, err := f.fetcher.GetWithRetry(url, 10)
-// 			if err != nil {
-// 				fmt.Println("error getting url: ", err)
-// 			}
-
-// 			body, err := io.ReadAll(resp.Body)
-// 			if err != nil {
-// 				fmt.Print("error reading resp body: ", err)
-// 			}
-
-// 			doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(body)))
-// 			if err != nil {
-// 				fmt.Print("Error parsing html: ", err)
-// 			}
-
-// 			essay := doc.Find(essayClass).Text()
-// 			fmt.Println(essay)
-// 		}
-// 		wg.Done()
-// 	}()
-// }
-// wg.Wait()
-// fmt.Println("finished")
-// }
 
 func (f *FireflyApp) runApp() {
 	f.createDict()
@@ -188,6 +159,7 @@ func main() {
 		wordsFilename: "words-mini.txt",
 		urlsFilename:  "endg-urls-mini",
 		fetcher:       fetcher.NewFetcher(limiter),
+		wordsCounter:  wordcounter.NewWordCounter(),
 	}
 	app.runApp()
 }
