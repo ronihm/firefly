@@ -38,6 +38,7 @@ func isAlphabetic(s string) bool {
 }
 
 func (f *FireflyApp) createWordsBank() {
+	fmt.Println("creating words bank")
 	f.wordsBank = safetrie.NewSafeTrie()
 	file, err := os.Open("./" + f.wordsFilename)
 	if err != nil {
@@ -97,6 +98,8 @@ func (f *FireflyApp) countWordsWorker(essaysChan <-chan string, wg *sync.WaitGro
 }
 
 func (f *FireflyApp) fetchAndProcessEssays() {
+	fmt.Println("fetching and processing essays")
+
 	// open url file
 	file, err := os.Open("./" + f.urlsFilename)
 	if err != nil {
@@ -150,13 +153,47 @@ func (f *FireflyApp) runApp() {
 	f.fetchAndProcessEssays()
 }
 
+func shouldUseMini() (bool, error) {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Printf("%s [y/n]: ", "would you like to use a shorter version of this program?")
+
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			return false, err
+		}
+
+		input = strings.TrimSpace(strings.ToLower(input))
+
+		if input == "y" || input == "yes" {
+			return true, nil
+		} else if input == "n" || input == "no" {
+			return false, nil
+		}
+
+		fmt.Println("Please enter 'y' for yes or 'n' for no.")
+	}
+}
+
 func main() {
 	limiter := rate.NewLimiter(2, 1)
 
+	urlsFile := "endg-urls"
+	wordsFile := "words.txt"
+
+	isMini, err := shouldUseMini()
+	if err != nil {
+		fmt.Println("error running app: ", err)
+	}
+	if isMini {
+		urlsFile = "endg-urls-mini"
+		wordsFile = "words-mini.txt"
+	}
+
 	// initialize app. I like working with interfaces to maintain a testable code
 	app := FireflyApp{
-		wordsFilename: "words-mini.txt",
-		urlsFilename:  "endg-urls-mini",
+		wordsFilename: wordsFile,
+		urlsFilename:  urlsFile,
 		fetcher:       fetcher.NewFetcher(limiter),
 		wordsCounter:  wordcounter.NewWordCounter(),
 	}
