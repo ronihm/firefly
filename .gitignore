@@ -1,0 +1,5 @@
+# Ignore vendors directory
+vendors/
+
+# Ignore Visual Studio Code settings directory
+.vscode/
