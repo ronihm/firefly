@@ -37,7 +37,7 @@ func isAlphabetic(s string) bool {
 	return regexp.MustCompile(`^[A-Za-z]+$`).MatchString(s)
 }
 
-func (f *FireflyApp) createDict() {
+func (f *FireflyApp) createWordsBank() {
 	f.wordsBank = safetrie.NewSafeTrie()
 	file, err := os.Open("./" + f.wordsFilename)
 	if err != nil {
@@ -143,11 +143,10 @@ func (f *FireflyApp) fetchAndProcessEssays() {
 		fmt.Println("error marshaling result: ", err)
 	}
 	fmt.Println(string(prettyJson))
-	fmt.Println("finished")
 }
 
 func (f *FireflyApp) runApp() {
-	f.createDict()
+	f.createWordsBank()
 	f.fetchAndProcessEssays()
 }
 
