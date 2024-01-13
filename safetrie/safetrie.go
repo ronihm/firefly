@@ -28,9 +28,5 @@ func (t *SafeTrie) IsInTrie(key string) bool {
 	t.mut.Lock()
 	defer t.mut.Unlock()
 
-	if t.trie.Get(key) == nil {
-		return false
-	}
-
-	return true
+	return t.trie.Get(key) != nil
 }
